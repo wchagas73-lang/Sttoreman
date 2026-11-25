@@ -83,7 +83,7 @@
 <article class="review-card"><div class="stars" aria-label="5 estrelas">★★★★★</div><p>“Loja espetacular, super indico o Rafael e equipe”</p><strong>Alfredo Portugal</strong></article>
 <article class="review-card"><div class="stars" aria-label="5 estrelas">★★★★★</div><p>“Adoro essa loja, ambiente limpo, arejado, organizado e com um atendimento que é o grande diferencial...”</p><strong>Bruno Santana</strong></article>
 <article class="review-card"><div class="stars" aria-label="5 estrelas">★★★★★</div><p>“Me trataram da melhor forma possível. Atendimento diferenciado demais, recomendo a todos os homens que querem mudar de visual.”</p><strong>BrenoGHeat</strong></article>
-<article class="review-card"><div class="stars" aria-label="5 estrelas">★★★★★</div><p>“Rafael e o Breno são impecáveis no atendimento, além de que os produtos são de excelente qualidade e com ótimos preços. Já virei um cliente fiel”</p><strong>Ruan Aquino Silva</strong></article></div><div class="review-controls"><button class="round-btn" id="prev-review" aria-label="Avaliação anterior">‹</button><button class="round-btn" id="next-review" aria-label="Próxima avaliação">›</button></div></div></section>
+<article class="review-card"><div class="stars" aria-label="5 estrelas">★★★★★</div><p>“Rafael e o Breno são impecáveis no atendimento, além de que os produtos são de excelente qualidade e com ótimos preços. Já virei um cliente fiel”</p><strong>Ruan Aquino Silva</strong></article></div></div></section>
 <section class="wrap" id="faq"><div class="section-head reveal"><div class="eyebrow">PODEMOS AJUDAR?</div><h2>Dúvidas frequentes</h2></div><div class="faq reveal">
 <details><summary>Como funciona a Mala Arara?</summary><p>Levamos uma seleção de peças até você experimentar. Consulte a equipe para verificar disponibilidade e condições.</p></details>
 <details><summary>Preciso agendar horário?</summary><p>Para um atendimento personalizado, recomendamos agendar seu horário com a equipe.</p></details>
@@ -109,7 +109,24 @@ document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
 document.querySelectorAll("img").forEach(img=>{if(img.complete&&img.naturalWidth)img.classList.add("loaded");else img.addEventListener("load",()=>img.classList.add("loaded"),{once:true})});
 const phrase="Transformando homens, não guarda-roupas.";let i=0;const typed=$("#typed");function type(){if(i<=phrase.length){typed.textContent=phrase.slice(0,i++);setTimeout(type,72)}}setTimeout(type,450);
 const count=$("[data-count]");let counted=false;const countObserver=new IntersectionObserver(entries=>{if(entries[0].isIntersecting&&!counted){counted=true;let start=0;const end=Number(count.dataset.count);const step=()=>{start=Math.min(end,start+Math.max(1,Math.ceil(end/30)));count.textContent=start+"+";if(start<end)requestAnimationFrame(step)};step();countObserver.disconnect()}},{threshold:.5});countObserver.observe(count);
-const reviews=$("#reviews");$("#prev-review").addEventListener("click",()=>reviews.scrollBy({left:-360,behavior:"smooth"}));$("#next-review").addEventListener("click",()=>reviews.scrollBy({left:360,behavior:"smooth"}));
+const reviews=$("#reviews");
+if(reviews){
+ const originals=[...reviews.children];
+ originals.forEach(card=>{const clone=card.cloneNode(true);clone.setAttribute("aria-hidden","true");reviews.appendChild(clone)});
+ let paused=false,last=0,resumeTimer;
+ const pause=()=>{paused=true;clearTimeout(resumeTimer)};
+ const resume=()=>{clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{paused=false;last=0},1200)};
+ reviews.addEventListener("pointerenter",pause);
+ reviews.addEventListener("pointerleave",resume);
+ reviews.addEventListener("pointerdown",pause);
+ reviews.addEventListener("pointerup",resume);
+ reviews.addEventListener("pointercancel",resume);
+ reviews.addEventListener("focusin",pause);
+ reviews.addEventListener("focusout",resume);
+ reviews.addEventListener("wheel",()=>{pause();resume()},{passive:true});
+ const move=now=>{if(!last)last=now;const delta=Math.min((now-last)/1000,.05);last=now;if(!paused){reviews.scrollLeft+=35*delta;const halfway=reviews.scrollWidth/2;if(halfway>0&&reviews.scrollLeft>=halfway)reviews.scrollLeft-=halfway}requestAnimationFrame(move)};
+ requestAnimationFrame(move);
+}
 $("#year").textContent=new Date().getFullYear();
 })();
 </script>
