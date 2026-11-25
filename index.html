@@ -59,6 +59,40 @@ body.viewer-open{overflow:hidden}
   .premium-progress span{transition:none!important}
 }
 
+
+/* Identidade editorial, luz ambiente e divisores: somente elementos de interface */
+.section-head h2,.about-copy h2,.team h2{
+  font-family:Georgia,"Times New Roman",serif;
+  letter-spacing:-.35px;
+}
+.section-dark{
+  background-image:radial-gradient(ellipse at 50% 0%,#c8aa6e0b 0%,transparent 58%),linear-gradient(140deg,#0a0a0a,#111 65%,#0b0b0b);
+}
+.section-head h2{position:relative;padding-bottom:17px}
+.section-head h2:after{
+  content:"";display:block;width:54px;height:1px;margin:15px auto 0;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  transform:scaleX(.35);transform-origin:center;
+  transition:transform .8s ease,opacity .8s ease;opacity:.65;
+}
+.section-head.reveal.visible h2:after{transform:scaleX(1);opacity:1}
+/* Cabeçalho compacto após sair da área inicial. Não modifica imagens. */
+.hero-overlay{transition:background .3s ease,border-color .3s ease,padding .3s ease}
+.hero-overlay.is-sticky{
+  position:fixed;top:0;left:0;right:0;z-index:10000;
+  padding:7px 14px;background:#090909ed;border-bottom:1px solid #c8aa6e55;
+  backdrop-filter:blur(12px);
+}
+.hero-overlay.is-sticky .hero-logo img{width:36px;max-height:36px}
+.hero-overlay.is-sticky .menu-dots summary{width:40px;height:40px;background:#111;border-color:#c8aa6e88}
+@media(max-width:620px){
+ .hero-overlay.is-sticky{padding:5px 10px}
+ .hero-overlay.is-sticky .hero-logo img{width:34px;max-height:34px}
+}
+@media(prefers-reduced-motion:reduce){
+ .section-head h2:after{transition:none!important;transform:scaleX(1);opacity:1}
+ .hero-overlay{transition:none!important}
+}
 </style>
 </head>
 <body>
@@ -145,6 +179,9 @@ body.viewer-open{overflow:hidden}
 <div class="media-viewer" id="media-viewer" role="dialog" aria-modal="true" aria-label="Visualização de mídia"><button class="media-close" id="media-close" type="button" aria-label="Fechar">×</button><div id="media-stage"></div></div>
 <script>
 (()=>{const $=s=>document.querySelector(s);
+const heroOverlay=document.querySelector(".hero-overlay"),heroSection=document.querySelector(".hero");
+const updateCompactHeader=()=>{if(!heroOverlay||!heroSection)return;heroOverlay.classList.toggle("is-sticky",window.scrollY>Math.max(180,heroSection.offsetHeight-90))};
+window.addEventListener("scroll",updateCompactHeader,{passive:true});window.addEventListener("resize",updateCompactHeader,{passive:true});updateCompactHeader();
 const progress=document.createElement("div");progress.className="premium-progress";progress.setAttribute("aria-hidden","true");const progressFill=document.createElement("span");progress.appendChild(progressFill);document.body.appendChild(progress);
 let progressQueued=false;const updateProgress=()=>{if(progressQueued)return;progressQueued=true;requestAnimationFrame(()=>{const max=document.documentElement.scrollHeight-window.innerHeight;const ratio=max>0?Math.min(1,Math.max(0,window.scrollY/max)):0;progressFill.style.transform="scaleX("+ratio+")";progressQueued=false})};window.addEventListener("scroll",updateProgress,{passive:true});window.addEventListener("resize",updateProgress,{passive:true});updateProgress();
 document.querySelectorAll(".menu-dots a").forEach(a=>a.addEventListener("click",()=>{$(".menu-dots").open=false}));
