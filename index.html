@@ -126,13 +126,10 @@ body.viewer-open{overflow:hidden}
 .media-viewer.open #media-stage img{
   animation:cinematicFadeIn .5s ease both;
 }
-/* Entrada suave das fotos da galeria, mantendo pixels e enquadramento originais */
-.look-card img.loaded{
-  animation:cinematicFadeIn .65s ease both;
-}
+/* Fotos sem animação adicional para manter a rolagem dos carrosséis fluida. */
 @media(prefers-reduced-motion:reduce){
   .hero-inner,.hero-inner .eyebrow,.hero-inner h1,.hero-inner .hero-sub,
-  .media-viewer.open #media-stage img,.look-card img.loaded{
+  .media-viewer.open #media-stage img{
     animation:none!important;clip-path:none!important;
   }
 }
@@ -234,44 +231,56 @@ document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
 document.querySelectorAll("img").forEach(img=>{if(img.complete&&img.naturalWidth)img.classList.add("loaded");else img.addEventListener("load",()=>img.classList.add("loaded"),{once:true})});
 
 const count=$("[data-count]");let counted=false;const countObserver=new IntersectionObserver(entries=>{if(entries[0].isIntersecting&&!counted){counted=true;let start=0;const end=Number(count.dataset.count);const step=()=>{start=Math.min(end,start+Math.max(1,Math.ceil(end/30)));count.textContent=start+"+";if(start<end)requestAnimationFrame(step)};step();countObserver.disconnect()}},{threshold:.5});countObserver.observe(count);
-const gallery=$("#gallery-carousel");
-if(gallery){
- const originals=[...gallery.children];
- originals.forEach(card=>{const clone=card.cloneNode(true);clone.classList.remove("reveal","visible");clone.setAttribute("aria-hidden","true");gallery.appendChild(clone)});
- let paused=false,last=0,resumeTimer;
- const pauseGallery=()=>{paused=true;clearTimeout(resumeTimer)};
- const resumeGallery=()=>{clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{paused=false;last=0},0)};
- gallery.addEventListener("pointerenter",pauseGallery);
- gallery.addEventListener("pointerleave",resumeGallery);
- gallery.addEventListener("pointerdown",pauseGallery);
- gallery.addEventListener("pointerup",resumeGallery);
- gallery.addEventListener("pointercancel",resumeGallery);
- gallery.addEventListener("touchstart",pauseGallery,{passive:true});
- gallery.addEventListener("touchend",resumeGallery,{passive:true});
- gallery.addEventListener("touchcancel",resumeGallery,{passive:true});
- gallery.addEventListener("wheel",()=>{pauseGallery();resumeGallery()},{passive:true});
- const slide=now=>{if(!last)last=now;const delta=Math.min((now-last)/1000,.05);last=now;if(!paused){gallery.scrollLeft+=44*delta;const halfway=gallery.scrollWidth/2;if(halfway>0&&gallery.scrollLeft>=halfway)gallery.scrollLeft-=halfway}requestAnimationFrame(slide)};
- requestAnimationFrame(slide);
-}
-const reviews=$("#reviews");
-if(reviews){
- const originals=[...reviews.children];
- originals.forEach(card=>{const clone=card.cloneNode(true);clone.setAttribute("aria-hidden","true");reviews.appendChild(clone)});
- let paused=false,last=0,resumeTimer;
+const setupMarquee=(selector,speed)=>{
+ const track=document.querySelector(selector);
+ if(!track)return;
+ const originals=[...track.children];
+ if(!originals.length)return;
+ originals.forEach(card=>{const clone=card.cloneNode(true);clone.classList.remove("reveal","visible");clone.setAttribute("aria-hidden","true");track.appendChild(clone)});
+ let paused=false,visible=false,last=0,frame=0,halfway=0,resumeTimer;
+ const measure=()=>{halfway=track.scrollWidth/2};
+ measure();
+ if("ResizeObserver" in window)new ResizeObserver(measure).observe(track);
  const pause=()=>{paused=true;clearTimeout(resumeTimer)};
- const resume=()=>{clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{paused=false;last=0},0)};
- reviews.addEventListener("pointerenter",pause);
- reviews.addEventListener("pointerleave",resume);
- reviews.addEventListener("pointerdown",pause);
- reviews.addEventListener("pointerup",resume);
- reviews.addEventListener("pointercancel",resume);
- reviews.addEventListener("touchstart",pause,{passive:true});
- reviews.addEventListener("touchend",resume,{passive:true});
- reviews.addEventListener("touchcancel",resume,{passive:true});
- reviews.addEventListener("wheel",()=>{pause();resume()},{passive:true});
- const move=now=>{if(!last)last=now;const delta=Math.min((now-last)/1000,.05);last=now;if(!paused){reviews.scrollLeft+=58*delta;const halfway=reviews.scrollWidth/2;if(halfway>0&&reviews.scrollLeft>=halfway)reviews.scrollLeft-=halfway}requestAnimationFrame(move)};
- requestAnimationFrame(move);
-}
+ const resume=()=>{clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{paused=false;last=0},900)};
+ ["pointerenter","touchstart","pointerdown","wheel"].forEach(type=>track.addEventListener(type,pause,{passive:true}));
+ ["pointerleave","touchend","touchcancel","pointerup","pointercancel"].forEach(type=>track.addEventListener(type,resume,{passive:true}));
+ track.addEventListener("wheel",resume,{passive:true});
+ const stop=()=>{if(frame)cancelAnimationFrame(frame);frame=0;last=0};
+ const animate=now=>{
+  if(!visible){stop();return}
+  if(!last)last=now;
+  const delta=Math.min((now-last)/1000,.05);last=now;
+  if(!paused&&halfway>0){
+   track.scrollLeft+=speed*delta;
+   if(track.scrollLeft>=halfway)track.scrollLeft-=halfway;
+  }
+  frame=requestAnimationFrame(animate);
+ };
+ const visibility=new IntersectionObserver(entries=>{
+  visible=entries[0].isIntersecting;
+  if(visible&&!frame)frame=requestAnimationFrame(animate);else if(!visible)stop();
+ },{threshold:0});
+ visibility.observe(track);
+};
+setupMarquee("#gallery-carousel",38);
+setupMarquee("#reviews",48);
+
+const videos=[...document.querySelectorAll(".videos video")];
+videos.forEach(video=>{
+ video.muted=true;video.defaultMuted=true;video.loop=true;video.playsInline=true;
+ video.preload="metadata";
+ video.addEventListener("ended",()=>{
+  video.currentTime=0;
+  video.play().catch(()=>{});
+ });
+});
+const videoVisibility=new IntersectionObserver(entries=>entries.forEach(entry=>{
+ const video=entry.target;
+ if(entry.isIntersecting){video.play().catch(()=>{});}
+ else{video.pause();}
+}),{threshold:.15});
+videos.forEach(video=>videoVisibility.observe(video));
 
 const viewer=$("#media-viewer"),stage=$("#media-stage"),closeViewer=()=>{viewer.classList.remove("open");document.body.classList.remove("viewer-open");stage.replaceChildren()};
 const openImage=img=>{const full=document.createElement("img");full.src=img.currentSrc||img.src;full.alt=img.alt||"Imagem STTOREMEN";stage.replaceChildren(full);viewer.classList.add("open");document.body.classList.add("viewer-open")};
