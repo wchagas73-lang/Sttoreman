@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="STTOREMEN. Moda masculina premium em Juiz de Fora. Conheça o catálogo e faça seu pedido pelo WhatsApp.">
+  <title>STTOREMEN | Moda Masculina</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="STTOREMEN início">STTORE<span>MEN</span></a>
+    <button class="cart-button" id="open-cart" aria-label="Abrir carrinho">SACOLA <b id="cart-count">0</b></button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">MODA MASCULINA PREMIUM</p>
+      <h1>ESTILO QUE<br><span>MARCA PRESENÇA.</span></h1>
+      <p>Escolha suas peças, monte seu pedido e finalize diretamente pelo WhatsApp.</p>
+      <a class="gold-button" href="#catalogo">VER CATÁLOGO</a>
+    </section>
+
+    <section class="catalog-section" id="catalogo">
+      <div class="section-heading">
+        <div><p class="eyebrow">SELEÇÃO STTOREMEN</p><h2>CATÁLOGO</h2></div>
+        <span class="muted" id="product-total"></span>
+      </div>
+      <div class="filters" id="category-filters"></div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Buscar produto..." aria-label="Buscar produto">
+        <select id="sort" aria-label="Ordenar produtos">
+          <option value="featured">Destaques</option>
+          <option value="price-asc">Menor preço</option>
+          <option value="price-desc">Maior preço</option>
+          <option value="name">Nome</option>
+        </select>
+      </div>
+      <div class="product-grid" id="product-grid"></div>
+    </section>
+
+    <section class="store-info">
+      <p class="eyebrow">VISITE A LOJA</p>
+      <h2>STTOREMEN</h2>
+      <p>R. Morais e Castro, 547<br>Juiz de Fora, MG</p>
+      <p>Segunda a sexta: 8h às 19h<br>Sábado: 8h às 14h</p>
+      <a class="outline-button" href="https://www.instagram.com/sttoremenjf/" target="_blank" rel="noopener">ACOMPANHE NO INSTAGRAM</a>
+    </section>
+  </main>
+
+  <footer><span>STTOREMEN</span><small>Moda masculina • Juiz de Fora</small></footer>
+
+  <div class="modal-backdrop" id="product-modal" aria-hidden="true">
+    <section class="modal product-modal" role="dialog" aria-modal="true" aria-label="Detalhes do produto">
+      <button class="close" data-close="product-modal" aria-label="Fechar">×</button>
+      <div class="modal-product-layout">
+        <div>
+          <img id="detail-image" class="detail-image" src="assets/img/placeholder.svg" alt="">
+          <div id="detail-thumbs" class="thumbs"></div>
+        </div>
+        <div class="detail-copy">
+          <p class="eyebrow" id="detail-category"></p>
+          <h2 id="detail-name"></h2>
+          <p class="price" id="detail-price"></p>
+          <p id="detail-description" class="muted"></p>
+          <label for="detail-color">Cor</label><select id="detail-color"></select>
+          <label for="detail-size">Tamanho</label><select id="detail-size"></select>
+          <label for="detail-qty">Quantidade</label><input id="detail-qty" type="number" min="1" value="1">
+          <button class="gold-button full" id="add-to-cart">ADICIONAR À SACOLA</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="cart-modal" aria-hidden="true">
+    <section class="modal cart-modal" role="dialog" aria-modal="true" aria-label="Sua sacola">
+      <button class="close" data-close="cart-modal" aria-label="Fechar">×</button>
+      <p class="eyebrow">SEU PEDIDO</p><h2>SACOLA</h2>
+      <div id="cart-items"></div>
+      <div class="cart-total"><span>TOTAL</span><strong id="cart-total">R$ 0,00</strong></div>
+      <label for="customer-name">Seu nome</label>
+      <input id="customer-name" type="text" placeholder="Digite seu nome">
+      <label for="customer-note">Observações (opcional)</label>
+      <textarea id="customer-note" rows="2" placeholder="Ex.: preferência de retirada..."></textarea>
+      <button class="gold-button full" id="checkout">ENVIAR PEDIDO PELO WHATSAPP</button>
+      <p class="tiny muted">O pedido será enviado para a loja para confirmação de disponibilidade e pagamento.</p>
+    </section>
+  </div>
+
+  <script src="products.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
