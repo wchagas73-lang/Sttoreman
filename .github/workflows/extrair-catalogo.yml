@@ -1,10 +1,11 @@
-name: Importar atualização do catálogo
+name: Extrair mídias do catálogo STTOREMEN
 
 on:
   push:
     branches: [main]
     paths:
-      - "catalogo-upload.zip"
+      - "Sttoreman1.zip"
+      - ".github/workflows/extrair-catalogo.yml"
   workflow_dispatch:
 
 permissions:
@@ -17,65 +18,53 @@ jobs:
       - name: Baixar repositório
         uses: actions/checkout@v4
 
-      - name: Validar e importar arquivos do catálogo
+      - name: Extrair imagens, vídeos e demais arquivos do ZIP
         run: |
           python - <<'PY'
-          from pathlib import PurePosixPath
-          from zipfile import ZipFile
-          from pathlib import Path
-          import shutil
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile, BadZipFile
 
-          archive = Path("catalogo-upload.zip")
-          if not archive.exists():
-              raise SystemExit("catalogo-upload.zip não encontrado.")
+          archive = Path("Sttoreman1.zip")
+          if not archive.is_file():
+              raise SystemExit("Sttoreman1.zip não encontrado na raiz do repositório.")
 
-          staging = Path("/tmp/catalogo-staging")
-          staging.mkdir(parents=True, exist_ok=True)
-          allowed_products = False
-          allowed_images = False
+          destination = Path("assets/importados")
+          destination.mkdir(parents=True, exist_ok=True)
+          total = 0
+          files = []
 
-          with ZipFile(archive) as z:
-              for item in z.infolist():
-                  name = item.filename.replace("\\", "/")
-                  path = PurePosixPath(name)
-                  if path.is_absolute() or ".." in path.parts:
-                      raise SystemExit(f"Caminho inválido no ZIP: {name}")
-                  if item.is_dir():
-                      continue
-                  if name == "products.js":
-                      target = staging / "products.js"
+          try:
+              with ZipFile(archive) as z:
+                  for item in z.infolist():
+                      name = item.filename.replace("\\", "/")
+                      path = PurePosixPath(name)
+                      if path.is_absolute() or ".." in path.parts:
+                          raise SystemExit(f"Caminho inseguro no ZIP: {name}")
+                      if item.is_dir():
+                          continue
+                      total += item.file_size
+                      if total > 500 * 1024 * 1024:
+                          raise SystemExit("ZIP excede o limite de 500 MB descompactados.")
+                      target = destination.joinpath(*path.parts)
                       target.parent.mkdir(parents=True, exist_ok=True)
                       target.write_bytes(z.read(item))
-                      allowed_products = True
-                  elif name.startswith("assets/img/"):
-                      relative = PurePosixPath(name).relative_to("assets/img")
-                      target = staging / "assets" / "img" / Path(*relative.parts)
-                      target.parent.mkdir(parents=True, exist_ok=True)
-                      target.write_bytes(z.read(item))
-                      allowed_images = True
+                      files.append((name, item.file_size))
+          except BadZipFile:
+              raise SystemExit("Sttoreman1.zip não é um arquivo ZIP válido.")
 
-          if not (allowed_products or allowed_images):
-              raise SystemExit("O ZIP precisa conter products.js e/ou arquivos em assets/img/.")
+          if not files:
+              raise SystemExit("O ZIP não contém arquivos para extrair.")
 
-          if allowed_products:
-              shutil.copy2(staging / "products.js", "products.js")
-          if allowed_images:
-              source = staging / "assets" / "img"
-              destination = Path("assets/img")
-              destination.mkdir(parents=True, exist_ok=True)
-              shutil.copytree(source, destination, dirs_exist_ok=True)
+          print(f"Arquivos extraídos: {len(files)}")
+          print(f"Total descompactado: {total} bytes")
+          for name, size in files:
+              print(f"{size:>10} bytes  {name}")
           PY
 
-          rm catalogo-upload.zip
-
-      - name: Salvar alterações no GitHub
+      - name: Salvar arquivos extraídos no GitHub
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add products.js assets/img catalogo-upload.zip
-          if git diff --cached --quiet; then
-            echo "Nenhuma alteração para salvar."
-          else
-            git commit -m "Atualiza catálogo de produtos"
-            git push
-          fi
+          git add assets/importados
+          git commit -m "Extrai mídias do catálogo STTOREMEN"
+          git push
