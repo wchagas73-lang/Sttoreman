@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Imagem de produto não cadastrada">
+  <rect width="800" height="1000" fill="#171717"/>
+  <path d="M250 410h300v250H250z" fill="none" stroke="#c7a45a" stroke-width="5"/>
+  <circle cx="340" cy="485" r="35" fill="none" stroke="#c7a45a" stroke-width="5"/>
+  <path d="m260 630 105-105 75 75 55-55 45 55" fill="none" stroke="#c7a45a" stroke-width="5"/>
+  <text x="400" y="735" fill="#c7a45a" font-family="Arial,sans-serif" font-size="30" text-anchor="middle" letter-spacing="5">STTOREMEN</text>
+  <text x="400" y="785" fill="#aaa" font-family="Arial,sans-serif" font-size="22" text-anchor="middle">FOTO EM BREVE</text>
+</svg>
