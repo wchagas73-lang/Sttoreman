@@ -93,6 +93,50 @@ body.viewer-open{overflow:hidden}
  .section-head h2:after{transition:none!important;transform:scaleX(1);opacity:1}
  .hero-overlay{transition:none!important}
 }
+
+/* Efeitos cinematográficos leves 2026/2027: sem filtros, zoom ou escurecimento das fotos */
+.hero .eyebrow,
+.hero h1,
+.hero .hero-sub{
+  color:var(--pale);
+  text-shadow:0 1px 8px #0008;
+}
+.hero-inner{
+  animation:cinematicFadeIn 1s ease both;
+}
+.hero-inner .eyebrow{animation:cinematicFadeIn .8s ease .12s both}
+.hero-inner h1{animation:goldTextReveal 1s cubic-bezier(.2,.7,.2,1) .28s both}
+.hero-inner .hero-sub{animation:cinematicFadeIn .9s ease .52s both}
+@keyframes cinematicFadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes goldTextReveal{
+  from{opacity:0;clip-path:inset(0 100% 0 0)}
+  to{opacity:1;clip-path:inset(0 0 0 0)}
+}
+/* Brilho dourado somente nos controles, nunca nas fotografias */
+.btn,.round-btn{
+  transition:transform .25s ease,background-color .25s ease,box-shadow .35s ease,border-color .35s ease;
+}
+.btn:hover,.btn:focus-visible,.round-btn:hover,.round-btn:focus-visible{
+  box-shadow:0 0 12px #c8aa6e55,0 0 26px #c8aa6e22;
+}
+/* Crossfade suave ao abrir fotos na visualização ampliada */
+.media-viewer.open #media-stage img{
+  animation:cinematicFadeIn .5s ease both;
+}
+/* Entrada suave das fotos da galeria, mantendo pixels e enquadramento originais */
+.look-card img.loaded{
+  animation:cinematicFadeIn .65s ease both;
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-inner,.hero-inner .eyebrow,.hero-inner h1,.hero-inner .hero-sub,
+  .media-viewer.open #media-stage img,.look-card img.loaded{
+    animation:none!important;clip-path:none!important;
+  }
+}
+
 </style>
 </head>
 <body>
